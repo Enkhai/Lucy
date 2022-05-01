@@ -36,8 +36,8 @@ if __name__ == '__main__':
                          net_arch=[dict(
                              # minus one for the key padding mask
                              query_dims=env.observation_space.shape[-1] - 1,
-                             # minus eight for the previous action
-                             kv_dims=env.observation_space.shape[-1] - 1 - 8,
+                             # minus the stack for the previous actions
+                             kv_dims=env.observation_space.shape[-1] - 1 - (5 * 8),
                              # the rest is default arguments
                          )] * 2,  # *2 because actor and critic will share the same architecture
                          action_stack_size=5)

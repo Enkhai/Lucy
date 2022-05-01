@@ -20,6 +20,7 @@ torch-geometric
 
 # SB3
 stable-baselines3==1.5.0
+tensorboard
 
 # custom RLGym utils
 git+https://github.com/Enkhai/lucy-utils
