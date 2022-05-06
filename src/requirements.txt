@@ -22,6 +22,9 @@ torch-geometric
 stable-baselines3==1.5.0
 tensorboard
 
+# Helps load models
+pickle5
+
 # custom RLGym utils
 git+https://github.com/Enkhai/lucy-utils
 
