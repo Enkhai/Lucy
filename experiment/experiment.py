@@ -13,15 +13,15 @@ from lucy_utils.rewards.sb3_log_reward import SB3NamedLogRewardCallback
 models_folder = "models_folder/"
 
 if __name__ == '__main__':
-    num_instances = 8
+    num_instances = 10
     agents_per_match = 2 * 2  # self-play
     n_steps, batch_size, gamma, fps, save_freq = config(num_instances=num_instances,
                                                         avg_agents_per_match=agents_per_match,
-                                                        target_steps=256_000,
+                                                        target_steps=320_000,
                                                         target_batch_size=0.5,
                                                         callback_save_freq=10)
 
-    matches = make_matches(logged_reward_cls=lambda log=False: LucyReward(gamma, log),
+    matches = make_matches(logged_reward_cls=lambda log=False: LucyReward(1, log),
                            terminal_conditions=lambda: LucyTerminalConditions(fps),
                            obs_builder_cls=lambda: LucyObs(stack_size=5),
                            action_parser_cls=LucyAction,
@@ -57,13 +57,13 @@ if __name__ == '__main__':
     callbacks = [SB3InstantaneousFPSCallback(),
                  SB3NamedLogRewardCallback(),
                  CheckpointCallback(save_freq,
-                                    save_path=models_folder + "Perceiver",
+                                    save_path=models_folder + "Perceiver_preproc_norm_LucyReward",
                                     name_prefix="model")]
-    model.learn(total_timesteps=1_000_000_000,
+    model.learn(total_timesteps=2_000_000_000,
                 callback=callbacks,
-                tb_log_name="PPO_Perceiver2_4x256",
+                tb_log_name="Perceiver_preproc_norm_LucyReward",
                 # reset_num_timesteps=False
                 )
-    model.save(models_folder + "Perceiver_final")
+    model.save(models_folder + "Perceiver_preproc_norm_LucyReward_final")
 
     env.close()

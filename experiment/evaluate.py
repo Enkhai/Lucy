@@ -13,7 +13,7 @@ if __name__ == '__main__':
 
     kwargs = {'custom_objects': custom_objects}
 
-    load_and_evaluate("../models_folder/NectoReward_ownPerceiver_2x128_final/NectoReward_ownPerceiver_2x128_final.zip",
+    load_and_evaluate("../models_folder/NectoReward_ownPerceiver_2x128/NectoReward_ownPerceiver_2x128_final.zip",
                       2,
                       LucyTerminalConditions(15),
                       LucyObs(stack_size=5),

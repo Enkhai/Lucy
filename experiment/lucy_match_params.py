@@ -13,22 +13,23 @@ from lucy_utils import rewards
 from lucy_utils.build_reward import build_logged_reward
 from lucy_utils.obs import GraphAttentionObs
 
-_f_reward_weight_args = ((rewards.SignedLiuDistanceBallToGoalReward, 8),
-                         (common_rewards.VelocityBallToGoalReward, 2),
-                         (rewards.BallYCoordinateReward, 1),
-                         (common_rewards.VelocityPlayerToBallReward, 0.5),
-                         (rewards.LiuDistancePlayerToBallReward, 0.5),
-                         (rewards.DistanceWeightedAlignBallGoal, 0.65, dict(defense=0.5, offense=0.5)),
-                         (common_rewards.SaveBoostReward, 0.5))
+_f_reward_weight_args = ((rewards.SignedLiuDistanceBallToGoalReward, 1.5, dict(dispersion=1.05)),
+                         (common_rewards.VelocityBallToGoalReward, 0.5),
+                         (common_rewards.SaveBoostReward, 0.5),
+                         (rewards.DistanceWeightedAlignBallGoal, 0.5, dict(dispersion=0.8)),
+                         (rewards.OffensivePotentialReward, 1, dict(density=1.1))
+                         )
 """
 Potential: reward class, weight (, kwargs)
 """
 
-_r_reward_name_weight_args = ((rewards.EventReward, "Goal", 1, dict(goal=10, team_goal=4, concede=-10)),
-                              (rewards.EventReward, "Shot", 1, dict(shot=1)),
+_r_reward_name_weight_args = ((rewards.EventReward, "Goal", 1, dict(goal=10, concede=-3)),
+                              (rewards.EventReward, "Shot", 1, dict(shot=1.5)),
                               (rewards.EventReward, "Save", 1, dict(save=3)),
+                              (rewards.TouchBallToGoalAccelerationReward, "Touch ball to goal acceleration", 0.25, {}),
                               (rewards.EventReward, "Touch", 1, dict(touch=0.05)),
-                              (rewards.EventReward, "Demo", 1, dict(demo=2, demoed=-2)))
+                              (rewards.EventReward, "Demo", 1, dict(demo=2, demoed=-2))
+                              )
 """
 Event: reward class, reward name, weight, kwargs
 """
@@ -45,7 +46,7 @@ def _get_terminal_conditions(fps):
 
 
 def _get_state():
-    replay_path = str(Path(__file__).parent / "../replay-samples/2v2/states.npy")
+    replay_path = str(Path(__file__).parent / "../replay-samples/platdiachampgcssl_2v2.npy")
     # Following Necto logic
     return WeightedSampleSetter.from_zipped(
         # replay setter uses carball, no warnings for numpy==1.21.5
