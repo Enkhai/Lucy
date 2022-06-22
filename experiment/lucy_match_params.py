@@ -13,7 +13,7 @@ from lucy_utils import rewards
 from lucy_utils.build_reward import build_logged_reward
 from lucy_utils.obs import GraphAttentionObs
 
-_f_reward_weight_args = ((rewards.SignedLiuDistanceBallToGoalReward, 2.5, dict(dispersion=1.05)),
+_f_reward_weight_args = ((rewards.LiuDistanceBallToGoalDiffReward, 2, dict(off_dispersion=0.6, def_dispersion=0.4)),
                          (common_rewards.VelocityBallToGoalReward, 0.8),
                          (common_rewards.SaveBoostReward, 0.5),
                          (rewards.DistanceWeightedAlignBallGoal, 0.6, dict(dispersion=0.8)),

@@ -18,7 +18,7 @@ if __name__ == '__main__':
     n_steps, batch_size, gamma, fps, save_freq = config(num_instances=num_instances,
                                                         avg_agents_per_match=agents_per_match,
                                                         target_steps=320_000,
-                                                        target_batch_size=0.5,
+                                                        target_batch_size=4_000,
                                                         callback_save_freq=10)
 
     matches = make_matches(logged_reward_cls=lambda log=False: LucyReward(1, log),
@@ -57,13 +57,13 @@ if __name__ == '__main__':
     callbacks = [SB3InstantaneousFPSCallback(),
                  SB3NamedLogRewardCallback(),
                  CheckpointCallback(save_freq,
-                                    save_path=models_folder + "Perceiver_preproc_norm_LucyReward",
+                                    save_path=models_folder + "Perceiver_LucyReward_v3",
                                     name_prefix="model")]
-    model.learn(total_timesteps=2_000_000_000,
+    model.learn(total_timesteps=3_500_000_000,
                 callback=callbacks,
-                tb_log_name="Perceiver_preproc_norm_LucyReward",
+                tb_log_name="Perceiver_LucyReward_v3",
                 # reset_num_timesteps=False
                 )
-    model.save(models_folder + "Perceiver_preproc_norm_LucyReward_final")
+    model.save(models_folder + "Perceiver_LucyReward_v3_final")
 
     env.close()

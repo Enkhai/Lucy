@@ -117,3 +117,5 @@ ENV/
 models_folder
 # Tensorboard logs
 bin
+# Reward logs
+combinedlogfiles
