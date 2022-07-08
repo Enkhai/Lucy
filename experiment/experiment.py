@@ -1,23 +1,29 @@
-from rlgym_tools.sb3_utils import SB3MultipleInstanceEnv
-from rlgym_tools.sb3_utils.sb3_instantaneous_fps_callback import SB3InstantaneousFPSCallback
-from stable_baselines3.common.callbacks import CheckpointCallback
-from stable_baselines3.common.vec_env import VecMonitor
-
-from lucy_match_params import LucyReward, LucyTerminalConditions, LucyObs, LucyState, LucyAction
+import wandb
 from lucy_utils.algorithms import DeviceAlternatingPPO
 from lucy_utils.models import PerceiverNet
 from lucy_utils.multi_instance_utils import config, make_matches
 from lucy_utils.policies import ActorCriticAttnPolicy
 from lucy_utils.rewards.sb3_log_reward import SB3NamedLogRewardCallback
+from rlgym_tools.sb3_utils import SB3MultipleInstanceEnv
+from rlgym_tools.sb3_utils.sb3_instantaneous_fps_callback import SB3InstantaneousFPSCallback
+from stable_baselines3.common.callbacks import CheckpointCallback
+from stable_baselines3.common.vec_env import VecMonitor
+from wandb.integration.sb3 import WandbCallback
+
+from lucy_match_params import LucyReward, LucyTerminalConditions, LucyObs, LucyState, LucyAction
 
 models_folder = "models_folder/"
+tensorboard_log_dir = "bin"
+model_name = "Perceiver_LucyReward_v4"
 
 if __name__ == '__main__':
-    num_instances = 10
+    # ----- ENV CONFIG -----
+
+    num_instances = 1
     agents_per_match = 2 * 2  # self-play
     n_steps, batch_size, gamma, fps, save_freq = config(num_instances=num_instances,
                                                         avg_agents_per_match=agents_per_match,
-                                                        target_steps=320_000,
+                                                        target_steps=20_000,
                                                         target_batch_size=4_000,
                                                         callback_save_freq=10)
 
@@ -29,15 +35,48 @@ if __name__ == '__main__':
                            sizes=[agents_per_match // 2] * num_instances  # self-play, hence // 2
                            )
 
+    action_stacking = 5
+
+    # ----- WANDB CONFIG -----
+
+    wandb_save_freq = save_freq * 4
+
+    config = {
+        'fps': fps,
+        'learning_rate': 1e-4,
+        'n_steps': n_steps,
+        'gamma': gamma,
+        'batch_size': batch_size,
+        'action_stacking': action_stacking,
+        'graph_obs': False,
+        'save_freq': save_freq,
+        'wandb_save_freq': wandb_save_freq
+    }
+
+    run = wandb.init(dir="wandb_bin",
+                     config=config,
+                     project='Lucy',
+                     entity='lucy-bot',
+                     name=model_name,
+                     resume='allow',
+                     # sync_tensorboard=True,
+                     id=None)
+
+    wandb.tensorboard.patch(root_logdir=tensorboard_log_dir)
+
+    # ----- ENV SETUP -----
+
     env = SB3MultipleInstanceEnv(match_func_or_matches=matches)
     env = VecMonitor(env)
+
+    # ----- MODEL SETUP -----
 
     policy_kwargs = dict(network_classes=PerceiverNet,
                          net_arch=[dict(
                              # minus one for the key padding mask
                              query_dims=env.observation_space.shape[-1] - 1,
                              # minus the stack for the previous actions
-                             kv_dims=env.observation_space.shape[-1] - 1 - (5 * 8),
+                             kv_dims=env.observation_space.shape[-1] - 1 - (action_stacking * 8),
                              # the rest is default arguments
                          )] * 2,  # *2 because actor and critic will share the same architecture
                          action_stack_size=5)
@@ -49,21 +88,32 @@ if __name__ == '__main__':
                                  n_steps=n_steps,
                                  gamma=gamma,
                                  batch_size=batch_size,
-                                 tensorboard_log="./bin",
+                                 tensorboard_log=tensorboard_log_dir,
                                  policy_kwargs=policy_kwargs,
                                  verbose=1,
                                  )
 
+    # ----- TRAINING -----
+
     callbacks = [SB3InstantaneousFPSCallback(),
                  SB3NamedLogRewardCallback(),
                  CheckpointCallback(save_freq,
-                                    save_path=models_folder + "Perceiver_LucyReward_v3",
-                                    name_prefix="model")]
+                                    save_path=models_folder + model_name,
+                                    name_prefix="model"),
+                 WandbCallback(verbose=2,
+                               model_save_path=f"{models_folder}/{run.id}",
+                               model_save_freq=config['wandb_save_freq'],
+                               gradient_save_freq=100)
+                 ]
+
     model.learn(total_timesteps=3_500_000_000,
                 callback=callbacks,
-                tb_log_name="Perceiver_LucyReward_v3",
+                tb_log_name=model_name,
                 # reset_num_timesteps=False
                 )
-    model.save(models_folder + "Perceiver_LucyReward_v3_final")
 
+    # ----- CLOSE -----
+
+    model.save(models_folder + model_name + "_final")
     env.close()
+    run.finish()
