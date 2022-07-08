@@ -7,7 +7,7 @@ from rlgym_tools.extra_action_parsers.kbm_act import KBMAction
 
 class Agent:
     def __init__(self):
-        _path = pathlib.Path(__file__).parent.resolve()
+        _path = pathlib.Path(__file__).parent.parent.resolve()
         # Resolve model loading issues - dummy values,
         custom_objects = {
             # pickle in Python 3.7 cannot parse stored schedule functions, we specify custom objects
@@ -16,7 +16,8 @@ class Agent:
             'n_envs': 1,  # need to specify one environment
         }
 
-        self.actor = PPO.load(str(_path) + '/model_599040000_steps.zip', device='cpu', custom_objects=custom_objects)
+        self.actor = PPO.load(str(_path) + '/models_folder/Perceiver_LucyReward_v3/model_2000000000_steps.zip',
+                              device='cpu', custom_objects=custom_objects)
         self.actor.policy.set_training_mode(False)
         self.parser = KBMAction()
 
