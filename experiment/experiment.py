@@ -1,4 +1,3 @@
-import wandb
 from lucy_utils.algorithms import DeviceAlternatingPPO
 from lucy_utils.models import PerceiverNet
 from lucy_utils.multi_instance_utils import config, make_matches
@@ -8,7 +7,6 @@ from rlgym_tools.sb3_utils import SB3MultipleInstanceEnv
 from rlgym_tools.sb3_utils.sb3_instantaneous_fps_callback import SB3InstantaneousFPSCallback
 from stable_baselines3.common.callbacks import CheckpointCallback
 from stable_baselines3.common.vec_env import VecMonitor
-from wandb.integration.sb3 import WandbCallback
 
 from lucy_match_params import LucyReward, LucyTerminalConditions, LucyObs, LucyState, LucyAction
 
@@ -23,7 +21,7 @@ if __name__ == '__main__':
     agents_per_match = 2 * 2  # self-play
     n_steps, batch_size, gamma, fps, save_freq = config(num_instances=num_instances,
                                                         avg_agents_per_match=agents_per_match,
-                                                        target_steps=20_000,
+                                                        target_steps=320_000,
                                                         target_batch_size=4_000,
                                                         callback_save_freq=10)
 
@@ -36,31 +34,6 @@ if __name__ == '__main__':
                            )
 
     action_stacking = 5
-
-    # ----- WANDB CONFIG -----
-
-    wandb_save_freq = save_freq * 4
-
-    config = {
-        'fps': fps,
-        'learning_rate': 1e-4,
-        'n_steps': n_steps,
-        'gamma': gamma,
-        'batch_size': batch_size,
-        'action_stacking': action_stacking,
-        'graph_obs': False,
-        'save_freq': save_freq,
-        'wandb_save_freq': wandb_save_freq
-    }
-
-    run = wandb.init(dir="bin",
-                     config=config,
-                     project='Lucy',
-                     entity='lucy-bot',
-                     name=model_name,
-                     resume='allow',
-                     sync_tensorboard=True,
-                     id=None)
 
     # ----- ENV SETUP -----
 
@@ -98,10 +71,6 @@ if __name__ == '__main__':
                  CheckpointCallback(save_freq,
                                     save_path=models_folder + model_name,
                                     name_prefix="model"),
-                 WandbCallback(verbose=2,
-                               model_save_path=f"{models_folder}/{run.id}",
-                               model_save_freq=config['wandb_save_freq'],
-                               gradient_save_freq=100)
                  ]
 
     model.learn(total_timesteps=3_500_000_000,
@@ -114,4 +83,3 @@ if __name__ == '__main__':
 
     model.save(models_folder + model_name + "_final")
     env.close()
-    run.finish()
