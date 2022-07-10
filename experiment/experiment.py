@@ -53,7 +53,7 @@ if __name__ == '__main__':
         'wandb_save_freq': wandb_save_freq
     }
 
-    run = wandb.init(dir="wandb_bin",
+    run = wandb.init(dir="bin",
                      config=config,
                      project='Lucy',
                      entity='lucy-bot',
