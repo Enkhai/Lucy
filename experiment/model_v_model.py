@@ -74,10 +74,9 @@ if __name__ == '__main__':
         'n_envs': 2,
     }
 
-    blue_model = PPO.load("../models_folder/Perceiver_LucyReward_v3/model_1001600000_steps.zip",
+    blue_model = PPO.load("../models_folder/Perceiver_LucyReward_v3/model_1500800000_steps.zip",
                           device="cpu", custom_objects=custom_objects)
-    orange_model = PPO.load("../models_folder/NectoReward_ownPerceiver_preproc_norm_stack5/"
-                            "NectoReward_ownPerceiver_preproc_norm_stack5_final.zip",
+    orange_model = PPO.load("../models_folder/Perceiver_LucyReward_v3_batch_12800/model_2000000000_steps.zip",
                             device="cpu", custom_objects=custom_objects)
 
     max_score_count = 500

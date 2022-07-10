@@ -19,7 +19,7 @@ model_name = "Perceiver_LucyReward_v4"
 if __name__ == '__main__':
     # ----- ENV CONFIG -----
 
-    num_instances = 1
+    num_instances = 10
     agents_per_match = 2 * 2  # self-play
     n_steps, batch_size, gamma, fps, save_freq = config(num_instances=num_instances,
                                                         avg_agents_per_match=agents_per_match,
@@ -59,10 +59,8 @@ if __name__ == '__main__':
                      entity='lucy-bot',
                      name=model_name,
                      resume='allow',
-                     # sync_tensorboard=True,
+                     sync_tensorboard=True,
                      id=None)
-
-    wandb.tensorboard.patch(root_logdir=tensorboard_log_dir)
 
     # ----- ENV SETUP -----
 
