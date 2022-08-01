@@ -17,7 +17,7 @@ model_name = "Perceiver_LucyReward_v4"
 if __name__ == '__main__':
     # ----- ENV CONFIG -----
 
-    num_instances = 10
+    num_instances = 20
     agents_per_match = 2 * 2  # self-play
     n_steps, batch_size, gamma, fps, save_freq = config(num_instances=num_instances,
                                                         avg_agents_per_match=agents_per_match,
@@ -25,15 +25,15 @@ if __name__ == '__main__':
                                                         target_batch_size=4_000,
                                                         callback_save_freq=10)
 
+    action_stacking = 5
+
     matches = make_matches(logged_reward_cls=lambda log=False: LucyReward(1, log),
                            terminal_conditions=lambda: LucyTerminalConditions(fps),
-                           obs_builder_cls=lambda: LucyObs(stack_size=5),
+                           obs_builder_cls=lambda: LucyObs(stack_size=action_stacking, add_boost_pads=True),
                            action_parser_cls=LucyAction,
                            state_setter_cls=LucyState,
                            sizes=[agents_per_match // 2] * num_instances  # self-play, hence // 2
                            )
-
-    action_stacking = 5
 
     # ----- ENV SETUP -----
 
