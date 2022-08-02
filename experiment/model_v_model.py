@@ -5,6 +5,7 @@ from typing import Any, List
 import numpy as np
 import rlgym
 from lucy_utils.obs import NectoObs
+import pandas as pd
 from rlgym.utils.gamestates import GameState
 from rlgym.utils.gamestates import PlayerData
 from rlgym.utils.obs_builders import ObsBuilder
@@ -12,6 +13,7 @@ from rlgym.utils.terminal_conditions import common_conditions
 from stable_baselines3 import PPO
 
 from lucy_match_params import LucyObs, LucyAction
+from lucy_utils.obs.old import OldGraphAttentionObs
 
 # import deprecated `utils` package for trained Necto to work
 utils_path = str(Path.home()) + "\\rocket_league_utils\\old_deprecated_utils"
@@ -55,7 +57,7 @@ if __name__ == '__main__':
                            common_conditions.NoTouchTimeoutCondition(fps * 45),
                            common_conditions.GoalScoredCondition()]
     # obs_builder = MultiModelObs([LucyObs(stack_size=5), NectoObs()], [2, 2])
-    obs_builder = MultiModelObs([LucyObs(stack_size=5)], [4])
+    obs_builder = MultiModelObs([OldGraphAttentionObs(stack_size=5)], [4])
 
     env = rlgym.make(game_speed=100,
                      tick_skip=tick_skip,
@@ -74,15 +76,20 @@ if __name__ == '__main__':
         'n_envs': 2,
     }
 
-    blue_model = PPO.load("../models_folder/Perceiver_LucyReward_v3/model_1500800000_steps.zip",
+    blue_model = PPO.load("../models_folder/Perceiver_LucyReward_v4/model_2000000000_steps.zip",
                           device="cpu", custom_objects=custom_objects)
-    orange_model = PPO.load("../models_folder/Perceiver_LucyReward_v3_batch_12800/model_2000000000_steps.zip",
+    orange_model = PPO.load("../models_folder/Perceiver_LucyReward_v3/model_2000000000_steps.zip",
                             device="cpu", custom_objects=custom_objects)
 
-    max_score_count = 500
+    max_score_count = 1000
 
-    blue_score = 0
-    orange_score = 0
+    match_name = "v4 vs v3, " + str(max_score_count) + " goals, 2 billion"
+
+    blue_score_sum = 0
+    orange_score_sum = 0
+
+    blue_scores = []
+    orange_scores = []
 
     score_count = 0
     while True:
@@ -95,21 +102,28 @@ if __name__ == '__main__':
 
         final_state: GameState = gameinfo['state']
 
-        blue_score_dif = final_state.blue_score - blue_score
-        orange_score_dif = final_state.orange_score - orange_score
+        blue_score_dif = final_state.blue_score - blue_score_sum
+        orange_score_dif = final_state.orange_score - orange_score_sum
 
         score_count += blue_score_dif + orange_score_dif
-        blue_score += blue_score_dif
-        orange_score += orange_score_dif
+        blue_score_sum += blue_score_dif
+        orange_score_sum += orange_score_dif
+
+        blue_scores.append(blue_score_sum)
+        orange_scores.append(orange_score_sum)
 
         if score_count >= max_score_count:
             break
+
+    df = pd.DataFrame([blue_scores, orange_scores]).T
+    df.columns = ["Blue score", "Orange score"]
+    df.to_csv(match_name)
 
     print("\n\n")
     print("====================")
     print("RESULT")
     print("====================")
-    print("Blue:", blue_score)
-    print("Orange:", orange_score)
+    print("Blue:", blue_score_sum)
+    print("Orange:", orange_score_sum)
 
     env.close()
