@@ -119,3 +119,4 @@ models_folder
 bin
 # Reward logs
 combinedlogfiles
+*.csv
