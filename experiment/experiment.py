@@ -12,16 +12,16 @@ from lucy_match_params import LucyReward, LucyTerminalConditions, LucyObs, LucyS
 
 models_folder = "models_folder/"
 tensorboard_log_dir = "bin"
-model_name = "Perceiver_LucyReward_v4"
+model_name = "Perceiver_LucyReward_v3.5"
 
 if __name__ == '__main__':
     # ----- ENV CONFIG -----
 
-    num_instances = 20
+    num_instances = 12
     agents_per_match = 2 * 2  # self-play
     n_steps, batch_size, gamma, fps, save_freq = config(num_instances=num_instances,
                                                         avg_agents_per_match=agents_per_match,
-                                                        target_steps=320_000,
+                                                        target_steps=300_000,
                                                         target_batch_size=4_000,
                                                         callback_save_freq=10)
 

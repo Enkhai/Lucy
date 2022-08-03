@@ -23,15 +23,13 @@ _f_reward_weight_args = ((rewards.LiuDistanceBallToGoalDiffReward, 2, dict(off_d
 Potential: reward class, weight (, kwargs)
 """
 
-_r_reward_name_weight_args = ((rewards.EventReward, "Goal", 1, dict(goal=6, concede=-2)),
-                              (rewards.EventReward, "Shot", 1, dict(shot=1)),
+
+_r_reward_name_weight_args = ((rewards.EventReward, "Goal", 1, dict(goal=10, concede=-3)),
+                              (rewards.EventReward, "Shot", 1, dict(shot=1.5)),
                               (rewards.EventReward, "Save", 1, dict(save=3)),
                               (rewards.TouchBallToGoalAccelerationReward, "Touch ball to goal acceleration", 0.25, {}),
                               (rewards.EventReward, "Touch", 1, dict(touch=0.05)),
-                              (rewards.EventReward, "Demo", 1, dict(demo=2, demoed=-2)),
-                              (rewards.CounterPressureReward, "Counter pressure", 1.75, {}),
-                              (rewards.OffensivePressureReward, "Offensive pressure", 5.5, {}),
-                              (rewards.DefensivePressureReward, "Defensive pressure", -4.5, {})
+                              (rewards.EventReward, "Demo", 1, dict(demo=2, demoed=-2))
                               )
 """
 Event: reward class, reward name, weight, kwargs
