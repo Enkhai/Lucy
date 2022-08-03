@@ -56,8 +56,8 @@ if __name__ == '__main__':
     terminal_conditions = [common_conditions.TimeoutCondition(fps * 300),
                            common_conditions.NoTouchTimeoutCondition(fps * 45),
                            common_conditions.GoalScoredCondition()]
-    # obs_builder = MultiModelObs([LucyObs(stack_size=5), NectoObs()], [2, 2])
-    obs_builder = MultiModelObs([OldGraphAttentionObs(stack_size=5)], [4])
+    obs_builder = MultiModelObs([OldGraphAttentionObs(stack_size=5), NectoObs()], [2, 2])
+    # obs_builder = MultiModelObs([OldGraphAttentionObs(stack_size=5)], [4])
 
     env = rlgym.make(game_speed=100,
                      tick_skip=tick_skip,
@@ -76,14 +76,14 @@ if __name__ == '__main__':
         'n_envs': 2,
     }
 
-    blue_model = PPO.load("../models_folder/Perceiver_LucyReward_v4/model_2000000000_steps.zip",
+    blue_model = PPO.load("../models_folder/Perceiver_LucyReward_v3/model_2000000000_steps.zip",
                           device="cpu", custom_objects=custom_objects)
-    orange_model = PPO.load("../models_folder/Perceiver_LucyReward_v3/model_2000000000_steps.zip",
+    orange_model = PPO.load("../models_folder/NectoTest2_Perceiver/model_2000000000_steps.zip",
                             device="cpu", custom_objects=custom_objects)
 
-    max_score_count = 1000
+    max_score_count = 600
 
-    match_name = "v4 vs v3, " + str(max_score_count) + " goals, 2 billion"
+    match_name = "v3 vs Necto, " + str(max_score_count) + " goals, 2 billion"
 
     blue_score_sum = 0
     orange_score_sum = 0
@@ -112,12 +112,12 @@ if __name__ == '__main__':
         blue_scores.append(blue_score_sum)
         orange_scores.append(orange_score_sum)
 
-        if score_count >= max_score_count:
+        if blue_score_sum >= max_score_count or orange_score_sum >= max_score_count:
             break
 
     df = pd.DataFrame([blue_scores, orange_scores]).T
     df.columns = ["Blue score", "Orange score"]
-    df.to_csv(match_name)
+    df.to_csv("comparison_results/" + match_name + ".csv")
 
     print("\n\n")
     print("====================")
