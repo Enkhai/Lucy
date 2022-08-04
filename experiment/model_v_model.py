@@ -90,11 +90,8 @@ if __name__ == '__main__':
 
     blue_score_sum = 0
     orange_score_sum = 0
-
     blue_scores = []
     orange_scores = []
-
-    score_count = 0
     while True:
         obs = env.reset()
         done = [False]
@@ -109,7 +106,6 @@ if __name__ == '__main__':
         blue_score_dif = final_state.blue_score - blue_score_sum
         orange_score_dif = final_state.orange_score - orange_score_sum
 
-        score_count += blue_score_dif + orange_score_dif
         blue_score_sum += blue_score_dif
         orange_score_sum += orange_score_dif
 
@@ -121,7 +117,7 @@ if __name__ == '__main__':
 
     df = pd.DataFrame([blue_scores, orange_scores]).T
     df.columns = ["Blue score", "Orange score"]
-    df.to_csv("comparison_results/" + match_name + ".csv")
+    df.to_csv("evaluation_results/" + match_name + ".csv")
 
     print("\n\n")
     print("====================")
