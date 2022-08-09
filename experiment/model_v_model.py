@@ -5,18 +5,16 @@ from typing import Any, List
 import numpy as np
 import pandas as pd
 from lucy_utils.multi_instance_utils import get_match
-from lucy_utils.obs import NectoObs
-from lucy_utils.obs.old import OldGraphAttentionObs
+from lucy_utils.obs import GraphAttentionObsV1, GraphAttentionObsV2, NectoObs
 from rlgym.utils.gamestates import GameState
 from rlgym.utils.gamestates import PlayerData
 from rlgym.utils.obs_builders import ObsBuilder
 from rlgym.utils.reward_functions import DefaultReward
 from rlgym.utils.state_setters import DefaultState
 from rlgym.utils.terminal_conditions import common_conditions
+from rlgym_tools.extra_action_parsers.kbm_act import KBMAction
 from rlgym_tools.sb3_utils import SB3MultipleInstanceEnv
 from stable_baselines3 import PPO
-
-from lucy_match_params import LucyAction
 
 # import deprecated `utils` package for trained Necto to work
 utils_path = str(Path.home()) + "\\rocket_league_utils\\old_deprecated_utils"
@@ -59,13 +57,18 @@ if __name__ == '__main__':
     terminal_conditions = [common_conditions.TimeoutCondition(fps * 300),
                            common_conditions.NoTouchTimeoutCondition(fps * 45),
                            common_conditions.GoalScoredCondition()]
-    # obs_builder = MultiModelObs([OldGraphAttentionObs(stack_size=5), NectoObs()], [2, 2])
-    obs_builder = MultiModelObs([OldGraphAttentionObs(stack_size=5)], [4])
+    # obs_builder = MultiModelObs([GraphAttentionObsV1(stack_size=5), NectoObs()], [2, 2])
+    # obs_builder = MultiModelObs([GraphAttentionObsV1(), NectoObs()], [2, 2])
+    # obs_builder = MultiModelObs([GraphAttentionObsV2(stack_size=5, add_boost_pads=True), NectoObs()], [2, 2])
+    obs_builder = MultiModelObs([GraphAttentionObsV1(stack_size=5)], [4])
+    # obs_builder = MultiModelObs([GraphAttentionObsV2(stack_size=5, add_boost_pads=True),
+    #                              GraphAttentionObsV1(stack_size=5)], [2, 2])
+    # obs_builder = MultiModelObs([NectoObs()], [4])
 
     match = get_match(reward=DefaultReward(),
                       terminal_conditions=terminal_conditions,
                       obs_builder=obs_builder,
-                      action_parser=LucyAction(),
+                      action_parser=KBMAction(),
                       state_setter=DefaultState(),
                       team_size=team_size,
                       )
@@ -79,14 +82,14 @@ if __name__ == '__main__':
         'n_envs': 2,
     }
 
-    blue_model = PPO.load("../models_folder/Perceiver_LucyReward_v4/model_2000000000_steps.zip",
+    blue_model = PPO.load("../models_folder/NectoReward_ownPerceiver_preproc_norm_stack5/model_501760000_steps.zip",
                           device="cpu", custom_objects=custom_objects)
-    orange_model = PPO.load("../models_folder/Perceiver_LucyReward_v3/model_2000000000_steps.zip",
+    orange_model = PPO.load("../models_folder/Perceiver_LucyReward_v3/model_502400000_steps.zip",
                             device="cpu", custom_objects=custom_objects)
 
-    max_score_count = 600
+    max_score_count = 300
 
-    match_name = "v4 vs v3, " + str(max_score_count) + " goals, 2 billion"
+    match_name = "Necto reduced + 5-stack vs v3, " + str(max_score_count) + " goals, 500 million, 1"
 
     blue_score_sum = 0
     orange_score_sum = 0

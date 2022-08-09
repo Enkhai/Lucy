@@ -11,7 +11,7 @@ from rlgym_tools.extra_state_setters.weighted_sample_setter import WeightedSampl
 
 from lucy_utils import rewards
 from lucy_utils.build_reward import build_logged_reward
-from lucy_utils.obs import GraphAttentionObs
+from lucy_utils.obs import GraphAttentionObsV1
 
 _f_reward_weight_args = ((rewards.LiuDistanceBallToGoalDiffReward, 2, dict(off_dispersion=0.6, def_dispersion=0.4)),
                          (common_rewards.VelocityBallToGoalReward, 0.8),
@@ -62,5 +62,5 @@ def _get_state():
 LucyReward = _get_reward
 LucyTerminalConditions = _get_terminal_conditions
 LucyState = _get_state
-LucyObs = GraphAttentionObs
+LucyObs = GraphAttentionObsV1
 LucyAction = KBMAction
