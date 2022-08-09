@@ -54,7 +54,7 @@ if __name__ == '__main__':
                          use_rp=True,
                          use_sr=True,
                          rp_seq_len=20,
-                         zero_rew_threshold=0.005)
+                         zero_rew_threshold=0.009)
 
     # model = DeviceAlternatingPPO.load("./models_folder/Perceiver/model_743680000_steps.zip", env)
     model = DeviceAlternatingAuxPPO(policy=AuxACAttnPolicy,
